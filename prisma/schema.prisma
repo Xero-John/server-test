@@ -1,0 +1,253 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model accounts {
+  account_id  Int       @id @default(autoincrement())
+  employee_id Int       @db.UnsignedInt
+  username    String?   @db.VarChar(45)
+  password    String?   @db.VarChar(45)
+  employees   employees @relation(fields: [employee_id], references: [employee_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_accounts_employees1")
+
+  @@index([employee_id], map: "fk_accounts_employees1_idx")
+}
+
+model address {
+  address_id  Int       @id @default(autoincrement())
+  employee_id Int       @db.UnsignedInt
+  street      String?   @db.VarChar(45)
+  barangay    String?   @db.VarChar(45)
+  city        String?   @db.VarChar(45)
+  province    String?   @db.VarChar(45)
+  employees   employees @relation(fields: [employee_id], references: [employee_id], onDelete: Cascade, map: "fk_address_employees1")
+
+  @@index([employee_id], map: "fk_address_employees1_idx")
+}
+
+model attendance {
+  attendance_id Int       @id @default(autoincrement())
+  employee_id   Int       @db.UnsignedInt
+  date          DateTime? @db.Date
+  time_in       DateTime? @db.Time(0)
+  time_out      DateTime? @db.Time(0)
+  shift_length  Int?
+  over_time     Int?
+  under_time    Int?
+  late_duration Int?
+  status        String?   @db.VarChar(45)
+  employees     employees @relation(fields: [employee_id], references: [employee_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_attendance_employees1")
+
+  @@index([employee_id], map: "fk_attendance_employees1_idx")
+}
+
+model deduction {
+  deduction_id       Int                  @id @default(autoincrement()) @db.UnsignedInt
+  deduction_name     String?              @db.VarChar(45)
+  type               String?              @db.VarChar(10)
+  calculation        String?              @db.VarChar(45)
+  amount             Decimal?             @db.Decimal(11, 2)
+  isActive           Int?                 @db.TinyInt
+  employee_deduction employee_deduction[]
+}
+
+model department {
+  department_id   Int         @id @default(autoincrement())
+  department_name String?     @db.VarChar(45)
+  employees       employees[]
+}
+
+model earnings {
+  earnings_id    Int              @id @default(autoincrement()) @db.UnsignedInt
+  earnings_name  String?          @db.VarChar(45)
+  calculation    String?          @db.VarChar(50)
+  isActive       Int?             @db.TinyInt
+  employee_gross employee_gross[]
+}
+
+model employee_deduction {
+  employee_deduction_id Int       @id @default(autoincrement())
+  deduction_id          Int       @db.UnsignedInt
+  payroll_id            Int       @db.UnsignedInt
+  amount                Decimal?  @db.Decimal(11, 2)
+  deduction             deduction @relation(fields: [deduction_id], references: [deduction_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_employee_deduction_deduction1")
+  payroll               payroll   @relation(fields: [payroll_id], references: [payroll_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_employee_deduction_payroll1")
+
+  @@index([deduction_id], map: "fk_employee_deduction_deduction1_idx")
+  @@index([payroll_id], map: "fk_employee_deduction_payroll1_idx")
+}
+
+model employee_gross {
+  employee_gross_id Int      @id @default(autoincrement())
+  payroll_id        Int      @db.UnsignedInt
+  earnings_id       Int      @db.UnsignedInt
+  amount            Decimal? @db.Decimal(11, 2)
+  payroll           payroll  @relation(fields: [payroll_id], references: [payroll_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_employee_gross_payroll1")
+  earnings          earnings @relation(fields: [earnings_id], references: [earnings_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_employee_gross_salaries1")
+
+  @@index([payroll_id], map: "fk_employee_gross_payroll1_idx")
+  @@index([earnings_id], map: "fk_employee_gross_salaries1_idx")
+}
+
+model employees {
+  employee_id   Int               @id @default(autoincrement()) @db.UnsignedInt
+  picture       Bytes?            @db.Blob
+  rfid          Int?              @db.UnsignedInt
+  first_name    String?           @db.VarChar(45)
+  last_name     String?           @db.VarChar(45)
+  middle_name   String?           @db.VarChar(45)
+  suffix        String?           @db.VarChar(5)
+  gender        employees_gender?
+  age           Int?
+  email         String?           @db.VarChar(45)
+  phone_no      String?           @db.VarChar(45)
+  birthdate     DateTime?         @db.Date
+  job_id        Int
+  working_type  String?           @db.VarChar(45)
+  hired_date    String?           @db.VarChar(45)
+  department_id Int
+  status_       String?           @db.VarChar(10)
+  isEmployed    Boolean?
+  accounts      accounts[]
+  address       address[]
+  attendance    attendance[]
+  department    department        @relation(fields: [department_id], references: [department_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_employees_department1")
+  job_class     job_class         @relation(fields: [job_id], references: [job_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_employees_job_class1")
+  leave         leave[]
+  login         login[]
+  notification  notification[]
+  payroll       payroll[]
+  privilege     privilege[]
+  schedule      schedule[]
+  units         units[]
+
+  @@index([department_id], map: "fk_employees_department1_idx")
+  @@index([job_id], map: "fk_employees_job_class1_idx")
+}
+
+model event_type {
+  event_type_id Int      @id @default(autoincrement())
+  event_name    String?  @db.VarChar(45)
+  events        events[]
+}
+
+model events {
+  event_id      Int        @id @default(autoincrement())
+  event_name    String?    @db.VarChar(45)
+  event_type_id Int
+  date          DateTime?  @db.Date
+  event_type    event_type @relation(fields: [event_type_id], references: [event_type_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_events_event_type1")
+
+  @@index([event_type_id], map: "fk_events_event_type1_idx")
+}
+
+model job_class {
+  job_id    Int         @id @default(autoincrement())
+  job_title String?     @db.VarChar(45)
+  employees employees[]
+}
+
+model leave {
+  leave_id         Int                @id @default(autoincrement())
+  employee_id      Int                @db.UnsignedInt
+  start_date       DateTime?          @db.Date
+  end_date         DateTime?          @db.Date
+  comment          String?            @db.Text
+  status           String?            @db.VarChar(8)
+  leave_type_id    Int
+  employees        employees          @relation(fields: [employee_id], references: [employee_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_leave_employees1")
+  leave_type       leave_type         @relation(fields: [leave_type_id], references: [leave_type_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_leave_leave_type1")
+  leave_attachment leave_attachment[]
+
+  @@index([employee_id], map: "fk_leave_employees1_idx")
+  @@index([leave_type_id], map: "fk_leave_leave_type1_idx")
+}
+
+model leave_attachment {
+  attachment_id Int    @id @default(autoincrement())
+  leave_id      Int
+  attachment    Bytes? @db.Blob
+  leave         leave  @relation(fields: [leave_id], references: [leave_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_leave_attachment_leave1")
+
+  @@index([leave_id], map: "fk_leave_attachment_leave1_idx")
+}
+
+model leave_type {
+  leave_type_id Int     @id @default(autoincrement())
+  leave_name    String? @db.VarChar(45)
+  duration      Int?
+  isActive      Int?    @db.TinyInt
+  leave         leave[]
+}
+
+model login {
+  login_id    Int       @id @default(autoincrement())
+  employee_id Int       @db.UnsignedInt
+  login_date  DateTime? @db.Date
+  employees   employees @relation(fields: [employee_id], references: [employee_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_login_employees1")
+
+  @@index([employee_id], map: "fk_login_employees1_idx")
+}
+
+model notification {
+  notification_id Int       @id @default(autoincrement())
+  employee_id     Int       @db.UnsignedInt
+  isSeen          Int?      @db.TinyInt
+  isRead          Int?      @db.TinyInt
+  date            DateTime? @db.Date
+  employees       employees @relation(fields: [employee_id], references: [employee_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_notification_employees1")
+
+  @@index([employee_id], map: "fk_notification_employees1_idx")
+}
+
+model payroll {
+  payroll_id             Int                  @id @default(autoincrement()) @db.UnsignedInt
+  employee_id            Int                  @db.UnsignedInt
+  payroll_date_period    DateTime?            @db.Date
+  gross_total_amount     Decimal?             @db.Decimal(11, 2)
+  deduction_total_amount Decimal?             @db.Decimal(11, 2)
+  net_salary             Decimal?             @db.Decimal(11, 2)
+  employee_deduction     employee_deduction[]
+  employee_gross         employee_gross[]
+  employees              employees            @relation(fields: [employee_id], references: [employee_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_payroll_employees")
+
+  @@index([employee_id], map: "fk_payroll_employees_idx")
+}
+
+model privilege {
+  privilege_id    Int       @id @default(autoincrement())
+  employee_id     Int       @db.UnsignedInt
+  privilege_level String?   @db.VarChar(45)
+  employees       employees @relation(fields: [employee_id], references: [employee_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_privilege_employees1")
+
+  @@index([employee_id], map: "fk_privilege_employees1_idx")
+}
+
+model schedule {
+  schedule_id Int       @id @default(autoincrement())
+  employee_id Int       @db.UnsignedInt
+  day_of_week String?   @db.VarChar(9)
+  time_in     DateTime? @db.Time(0)
+  time_out    DateTime? @db.Time(0)
+  employees   employees @relation(fields: [employee_id], references: [employee_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_schedule_employees1")
+
+  @@index([employee_id], map: "fk_schedule_employees1_idx")
+}
+
+model units {
+  units_id    Int       @id @default(autoincrement())
+  units       Int?
+  employee_id Int       @db.UnsignedInt
+  employees   employees @relation(fields: [employee_id], references: [employee_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_units_employees1")
+
+  @@index([employee_id], map: "fk_units_employees1_idx")
+}
+
+enum employees_gender {
+  M
+  F
+}

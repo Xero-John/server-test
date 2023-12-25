@@ -3,8 +3,12 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "build": "prisma generate && prisma migrate deploy",
     "start": "node app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
   },
   "repository": {
     "type": "git",
@@ -17,6 +21,15 @@
   },
   "homepage": "https://github.com/Xero-John/server-test#readme",
   "dependencies": {
+    "@prisma/client": "^5.7.1",
     "express": "^4.17.1"
-  }
+  },
+  "description": "",
+  "devDependencies": {
+    "@types/node": "^20.10.5",
+    "prisma": "^5.7.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  },
+  "keywords": []
 }
