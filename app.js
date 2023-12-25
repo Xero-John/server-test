@@ -12,6 +12,11 @@ app.get('/account', (req, res) => {
     message: 'account!',
   })
 })
+app.get('/thanks', (req, res) => {
+  res.json({
+    message: 'thanks!',
+  })
+})
 
 app.listen(port, () => {
   console.log(`App listening at http://localhost:${port}`)
