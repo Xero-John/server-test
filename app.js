@@ -22,6 +22,10 @@ const account = app.get('/accounts/:username&:password', async (req, res) => {
         }
     });
 
+    if(data.length === 0) {
+        res.json([{error: 'error'}]);
+        return;
+    }
     res.json(data);
     return data.map(d => d.employee_id).toString()
 
