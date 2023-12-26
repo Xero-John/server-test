@@ -5,6 +5,8 @@ const {PrismaClient} = require('@prisma/client');
 const prisma = new PrismaClient();
 
 app.get('/accounts', async (req, res) => {
+    const input = req.query.input;
+    console.log(input);
     const hello = await prisma.accounts.findMany();
     res.json(hello);
 })
@@ -17,21 +19,6 @@ app.get('/', async (req, res) => {
     });
 })
 
-// app.get('/', (req, res) => {
-//   res.json({
-//     message: 'Hello!',
-//   })
-// })
-// app.get('/account', (req, res) => {
-//   res.json({
-//     message: 'account!',
-//   })
-// })
-// app.get('/thanks', (req, res) => {
-//   res.json({
-//     message: 'thanks!',
-//   })
-// })
 
 app.listen(port, () => {
   console.log(`App listening at http://localhost:${port}`)
