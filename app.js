@@ -1,6 +1,7 @@
 const express = require('express')
 const app = express()
 const port = process.env.PORT || 3000
+const ip = process.env.IP || '127.0.0.1'
 const {PrismaClient, accounts} = require('@prisma/client');
 const prisma = new PrismaClient();
 const account = app.get('/accounts/:username&:password', async (req, res) => {
@@ -97,5 +98,5 @@ app.get("/", (req, res) => {
 
 
 app.listen(port, () => {
-    console.log(`App listening at http://localhost:${port}`)
+    console.log(`App listening at http://${ip}:${port}`)
 })
